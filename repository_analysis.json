@@ -1,0 +1,68 @@
+{
+  "analysis_metadata": {
+    "timestamp": "2026-03-05T18:30:00Z",
+    "total_repositories": 19,
+    "analysis_approach": "risk-based_prioritization"
+  },
+  "risk_prioritization": {
+    "critical": [
+      {
+        "repo": "fantasy_mcp",
+        "risk_factors": ["public", "python", "recent_activity"],
+        "reason": "Public Python repo with MCP - highest exposure risk"
+      }
+    ],
+    "high": [
+      {
+        "repo": "secops-ai-platform", 
+        "risk_factors": ["recent_activity", "security_related", "shell_scripts"],
+        "reason": "Security platform with shell scripts - sensitive business logic"
+      },
+      {
+        "repo": "groundlayer_regs_v2",
+        "risk_factors": ["complex_stack", "recent_activity", "web_app"],
+        "reason": "Complex web application with multiple languages"
+      },
+      {
+        "repo": "learning_app",
+        "risk_factors": ["typescript", "database", "web_app"],
+        "reason": "Full-stack web application with database"
+      },
+      {
+        "repo": "cardvault-production",
+        "risk_factors": ["production", "typescript", "python"],
+        "reason": "Production application handling sensitive data"
+      }
+    ],
+    "medium": [
+      {
+        "repo": "project_executioner",
+        "risk_factors": ["typescript", "python", "makefile"],
+        "reason": "Project management tool with execution capabilities"
+      },
+      {
+        "repo": "gandalf-security-v2",
+        "risk_factors": ["security_related", "javascript", "terraform"],
+        "reason": "Security tool with infrastructure code"
+      },
+      {
+        "repo": "gandalf_security",
+        "risk_factors": ["security_related", "terraform", "html"],
+        "reason": "Security infrastructure project"
+      }
+    ],
+    "low": [
+      "ralph-runner-setup",
+      "crypto_fun", 
+      "cissp-compass",
+      "learn_cissp",
+      "groundlayer-regs",
+      "mhmcustoms",
+      "fantasy_analyst",
+      "groundlayer-ai",
+      "firstmcp_server",
+      "pdsnd_github",
+      "Subzero"
+    ]
+  }
+}

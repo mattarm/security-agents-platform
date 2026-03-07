@@ -1,0 +1,212 @@
+# Okta Security Integration Configuration
+
+# Okta API Configuration
+okta:
+  org_url: "https://dev-123456.okta.com"
+  api_token: "${OKTA_API_TOKEN}"
+  
+  # Optional OAuth configuration (alternative to API token)
+  oauth:
+    client_id: "${OKTA_CLIENT_ID}"
+    private_key_path: "/path/to/private_key.pem"
+    scopes:
+      - "okta.logs.read"
+      - "okta.users.read"
+      - "okta.users.manage"
+      - "okta.groups.read"
+      - "okta.apps.read"
+  
+  # Rate limiting
+  rate_limit_buffer: 10
+  circuit_breaker_enabled: true
+
+# Event Collection Configuration
+event_collection:
+  enabled: true
+  poll_interval: 30  # seconds
+  buffer_size: 10000
+  enable_enrichment: true
+  
+  # Redis for state management (optional)
+  redis:
+    url: "redis://localhost:6379"
+    enabled: false
+
+# Analytics Configuration
+analytics:
+  # Correlation Engine
+  correlation:
+    window_size: 3600  # 1 hour in seconds
+    
+  # Threat Detection
+  threat_detection:
+    model_path: "./models/"
+    enable_ml_detection: true
+    enable_behavioral_analysis: true
+    
+  # Rules Engine
+  rules:
+    config_path: "./config/rules.json"
+    auto_reload: true
+
+# Response System Configuration
+response:
+  enabled: true
+  require_approval: true
+  auto_approve_low_severity: true
+  max_concurrent_actions: 5
+  
+  # Rate limits for response actions
+  rate_limits:
+    suspend_user:
+      max_per_hour: 10
+    block_ip:
+      max_per_hour: 50
+    disable_application:
+      max_per_hour: 5
+
+# Notification Configuration
+notifications:
+  enabled: true
+  
+  channels:
+    email:
+      enabled: true
+      smtp_server: "smtp.company.com"
+      smtp_port: 587
+      use_tls: true
+      username: "${SMTP_USERNAME}"
+      password: "${SMTP_PASSWORD}"
+      from_address: "security@company.com"
+      to_addresses:
+        - "security-team@company.com"
+        - "soc@company.com"
+      severity_filter: ["MEDIUM", "HIGH", "CRITICAL"]
+    
+    slack:
+      enabled: true
+      webhook_url: "${SLACK_WEBHOOK_URL}"
+      severity_filter: ["HIGH", "CRITICAL"]
+    
+    teams:
+      enabled: false
+      webhook_url: "${TEAMS_WEBHOOK_URL}"
+      severity_filter: ["CRITICAL"]
+    
+    webhooks:
+      pagerduty:
+        enabled: true
+        webhook_url: "${PAGERDUTY_WEBHOOK_URL}"
+        severity_filter: ["CRITICAL"]
+        headers:
+          Authorization: "Token token=${PAGERDUTY_API_KEY}"
+
+# SIEM Integration Configuration
+siem:
+  # Panther Configuration
+  panther:
+    enabled: true
+    delivery_method: "http"  # http, s3, both
+    
+    # HTTP delivery
+    http_endpoint: "${PANTHER_HTTP_ENDPOINT}"
+    auth_token: "${PANTHER_API_TOKEN}"
+    
+    # S3 delivery
+    s3_bucket: "panther-logs-bucket"
+    s3_prefix: "okta-logs"
+    s3_region: "us-east-1"
+    aws_access_key_id: "${AWS_ACCESS_KEY_ID}"
+    aws_secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
+    
+    # Batch settings
+    batch_size: 1000
+    batch_timeout: 300  # 5 minutes
+    compression: true
+    max_retries: 3
+    retry_delay: 5
+  
+  # CrowdStrike Configuration
+  crowdstrike:
+    enabled: false
+    logscale_url: "https://cloud.humio.com"
+    repository: "okta-logs"
+    ingest_token: "${CROWDSTRIKE_INGEST_TOKEN}"
+    api_token: "${CROWDSTRIKE_API_TOKEN}"
+    
+    datasource: "okta-identity-security"
+    parser: "json"
+    
+    # Batch settings
+    batch_size: 1000
+    batch_timeout: 60  # 1 minute
+    compression: true
+    max_retries: 3
+    retry_delay: 2
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "json"
+  
+  # File logging
+  file:
+    enabled: true
+    path: "./logs/okta-security.log"
+    max_size: "10MB"
+    backup_count: 5
+  
+  # Console logging
+  console:
+    enabled: true
+    colored: true
+
+# Monitoring Configuration
+monitoring:
+  enabled: true
+  
+  # Health check endpoint
+  health_check:
+    enabled: true
+    port: 8080
+    path: "/health"
+  
+  # Prometheus metrics
+  prometheus:
+    enabled: true
+    port: 8080
+    path: "/metrics"
+  
+  # Performance monitoring
+  performance:
+    log_slow_operations: true
+    slow_threshold: 5.0  # seconds
+
+# Security Configuration
+security:
+  # Credential encryption
+  encryption:
+    enabled: true
+    key_file: "/path/to/encryption.key"
+  
+  # Audit logging
+  audit:
+    enabled: true
+    log_file: "./logs/audit.log"
+  
+  # Access control
+  access_control:
+    require_api_key: false
+    api_key: "${API_KEY}"
+    allowed_ips: []
+
+# Development/Testing Configuration
+development:
+  debug_mode: false
+  mock_okta_api: false
+  skip_ssl_verification: false
+  
+  # Test configuration
+  test:
+    generate_test_events: false
+    test_event_interval: 60  # seconds
