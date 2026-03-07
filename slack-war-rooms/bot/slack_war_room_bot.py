@@ -19,6 +19,12 @@ from slack_bolt.adapter.socket_mode import SocketModeHandler
 import sqlite3
 import threading
 
+# Import Sigma integration
+try:
+    from sigma_integration import SigmaSlackIntegration, format_sigma_response
+except ImportError:
+    logger.warning("Sigma integration not available - metrics commands will not work")
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -502,6 +508,14 @@ class SlackWarRoomBot:
         self.db = WarRoomDatabase()
         self.agents = SecurityAgentsIntegration()
         
+        # Initialize Sigma metrics integration
+        try:
+            self.sigma = SigmaSlackIntegration()
+            logger.info("Sigma metrics agent integration enabled")
+        except Exception as e:
+            logger.warning(f"Sigma integration failed: {e}")
+            self.sigma = None
+        
         self.setup_handlers()
     
     def setup_handlers(self):
@@ -548,6 +562,12 @@ class SlackWarRoomBot:
         async def status_command_handler(ack, respond, command):
             await ack()
             await self.handle_status_command(respond, command)
+        
+        # Sigma metrics commands
+        @self.app.command("/sigma")
+        async def sigma_command_handler(ack, respond, command):
+            await ack()
+            await self.handle_sigma_command(respond, command)
     
     async def handle_create_war_room(self, respond, command):
         """Handle war room creation"""
@@ -871,6 +891,35 @@ class SlackWarRoomBot:
         except Exception as e:
             logger.error(f"Status command error: {e}")
             await respond("Error retrieving war room status.")
+    
+    async def handle_sigma_command(self, respond, command):
+        """Handle Sigma security program metrics commands"""
+        try:
+            if not self.sigma:
+                await respond("❌ Sigma metrics agent not available. Please check configuration.")
+                return
+            
+            parts = command['text'].strip().split(maxsplit=1)
+            if len(parts) < 1:
+                await respond("Usage: `/sigma <command> [parameters]`\nCommands: dashboard, report, metric, update, trend")
+                return
+            
+            cmd = parts[0]
+            params = parts[1] if len(parts) > 1 else ""
+            
+            # Execute Sigma command
+            result = await self.sigma.execute_sigma_command(cmd, params)
+            
+            # Record interaction
+            await self.record_agent_interaction(command['channel_id'], "sigma", command['text'], result, command['user_id'])
+            
+            # Format and send response
+            formatted_response = format_sigma_response(result)
+            await respond(formatted_response)
+                
+        except Exception as e:
+            logger.error(f"Sigma command error: {e}")
+            await respond(f"❌ Error executing Sigma command: {str(e)}")
     
     def start(self):
         """Start the Slack War Room Bot"""

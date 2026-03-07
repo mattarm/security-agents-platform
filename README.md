@@ -14,8 +14,8 @@
 SecurityAgents is a **production-ready, enterprise security platform** providing:
 
 - **🛡️ Complete Cyber Operations**: Blue team defense, red team offense, purple team validation
-- **🤖 AI-Powered Automation**: 7 specialized agents with advanced threat detection and response
-- **🔧 GitHub Security Tools**: 15+ integrated security frameworks (CALDERA, TheHive, BloodHound, etc.)
+- **🤖 AI-Powered Automation**: 5 specialized agents with advanced threat detection and response
+- **🔧 GitHub Security Tools**: 10 integrated security frameworks (CALDERA, TheHive, BloodHound, etc.)
 - **🔐 Identity Security**: Comprehensive Okta integration with Panther/CrowdStrike SIEM support
 - **📈 Enterprise Ready**: Production deployment, compliance frameworks, and monitoring
 
@@ -41,11 +41,9 @@ graph TB
         subgraph "Specialized Security Agents"
             Alpha[Alpha-4: Threat Intelligence]
             Beta[Beta-4: DevSecOps Automation]
-            Gamma[Gamma: Blue Team Defense]
-            Delta[Delta: Red Team Offense]
-            Epsilon[Epsilon: Purple Team Ops]
-            Zeta[Zeta: Identity Security]
-            Eta[Eta: Digital Forensics]
+            Gamma[Gamma: SOC Operations]
+            Delta[Delta: Red Team Operations]
+            Sigma[Sigma: Security Metrics]
         end
         
         subgraph "GitHub Security Tools"
@@ -68,9 +66,7 @@ graph TB
     Beta --> IF
     Gamma --> IF
     Delta --> IF
-    Epsilon --> IF
-    Zeta --> IF
-    Eta --> IF
+    Sigma --> IF
     
     IF --> AO
     AO --> API
@@ -78,7 +74,7 @@ graph TB
     Gamma -.-> TheHive
     Delta -.-> CALDERA
     Delta -.-> Atomic
-    Zeta -.-> Okta
+    Gamma -.-> Okta
     All -.-> Panther
     All -.-> CrowdStrike
 ```
@@ -130,27 +126,28 @@ python enhanced-analysis/production_api_server.py
 
 ### **Core Security Operations**
 
-| Agent | Purpose | Key Capabilities | Lines of Code |
-|-------|---------|------------------|---------------|
-| **🧠 Alpha-4** | Threat Intelligence | OSINT, threat correlation, campaign analysis | 30k |
-| **🔒 Beta-4** | DevSecOps | Secure code review, architecture analysis, CI/CD security | 59k |
-| **🛡️ Gamma** | Blue Team Defense | SOC automation, incident response, threat hunting | 24k |
-| **⚔️ Delta** | Red Team Offense | Penetration testing, adversary simulation, attack automation | 36k |
-| **🔄 Epsilon** | Purple Team | Continuous validation, red/blue coordination | Designed |
-| **🔐 Zeta** | Identity Security | Okta integration, identity threat detection, UEBA | 18k |
-| **🔍 Eta** | Digital Forensics | Investigation automation, evidence collection | Designed |
+| Agent | Purpose | Key Capabilities | Implementation |
+|-------|---------|------------------|----------------|
+| **🧠 Alpha-4** | Threat Intelligence | CrowdStrike intel correlation, threat actor research, IOC analysis | ✅ Complete |
+| **🛡️ Gamma** | SOC Operations | Incident response automation, threat hunting, containment | ✅ Complete |
+| **🔒 Beta-4** | DevSecOps Security | Container scanning, K8s assessment, pipeline security | ✅ Complete |
+| **⚔️ Delta** | Red Team Operations | Purple team exercises, attack simulation, detection validation | ✅ Complete |
+| **📊 Sigma** | Security Metrics | Program performance tracking, ODM reporting, executive dashboards | ✅ Complete |
 
 ### **GitHub Security Tools Integration**
 
-| Tool | GitHub Stars | Integration | Capabilities |
-|------|--------------|-------------|--------------|
-| **MITRE CALDERA** | 4.2k | API Client | Adversary emulation, automated testing |
-| **TheHive** | 2.8k | API Client | Incident response, case management |
-| **BloodHound** | 8.9k | Data Analysis | AD attack paths, privilege escalation |
-| **Atomic Red Team** | 8.1k | CLI Wrapper | Detection testing, ATT&CK coverage |
-| **Sigma** | 6.2k | Rule Engine | Detection rules, SIEM integration |
-| **Velociraptor** | 2.1k | Forensics Client | Remote collection, artifact analysis |
-| **Empire** | 6.8k | C2 Framework | Post-exploitation, persistence |
+| Tool | Repository | Integration | Capabilities |
+|------|------------|-------------|--------------|
+| **MITRE CALDERA** | `mitre/caldera` | Docker + API | Adversary emulation, automated testing |
+| **TheHive** | `TheHive-Project/TheHive` | Docker + API | Incident response, case management |
+| **BloodHound** | `BloodHoundAD/BloodHound` | Docker + Analysis | AD attack paths, privilege escalation |
+| **Atomic Red Team** | `redcanaryco/atomic-red-team` | CLI Wrapper | Detection testing, ATT&CK coverage |
+| **Sigma Rules** | `SigmaHQ/sigma` | Rule Engine | Detection rules, SIEM integration |
+| **Velociraptor** | `Velocidex/velociraptor` | Forensics Client | Remote collection, artifact analysis |
+| **Empire** | `EmpireProject/Empire` | C2 Framework | Post-exploitation, persistence |
+| **CrackMapExec** | `byt3bl33d3r/CrackMapExec` | CLI Wrapper | Network penetration, credential testing |
+| **MISP** | `MISP/MISP` | API Integration | Threat intelligence sharing, IOCs |
+| **Wazuh** | `wazuh/wazuh` | SIEM Integration | Security monitoring, compliance |
 | **MISP** | 4.5k | API Client | Threat intelligence sharing |
 | **Wazuh** | 7.8k | SIEM Integration | Security monitoring, log analysis |
 | **CrackMapExec** | 6.5k | Pentesting Tool | Network pentesting, lateral movement |

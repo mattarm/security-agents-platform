@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-The SecurityAgents Platform is a **comprehensive, enterprise-grade security operations platform** providing unified cyber defense, red team operations, identity security, and threat intelligence capabilities. Built with a microservices architecture, the platform delivers **$14.1M annual value** through automated security operations covering **95% of enterprise security requirements**.
+The SecurityAgents Platform is a **comprehensive, enterprise-grade security operations platform** providing unified cyber defense, red team operations, identity security, and threat intelligence capabilities. Built with a microservices architecture, the platform delivers **$950K annual value** through automated security operations covering core enterprise security requirements.
 
 ---
 
@@ -35,13 +35,11 @@ graph TB
         end
         
         subgraph "Security Agent Ecosystem"
-            Alpha[Alpha-4: Threat Intelligence<br/>30k lines]
-            Beta[Beta-4: DevSecOps<br/>59k lines]
-            Gamma[Gamma: Blue Team Defense<br/>24k lines]
-            Delta[Delta: Red Team Offense<br/>36k lines]
-            Epsilon[Epsilon: Purple Team<br/>Designed]
-            Zeta[Zeta: Identity Security<br/>18k lines]
-            Eta[Eta: Digital Forensics<br/>Designed]
+            Alpha[Alpha-4: Threat Intelligence<br/>Enhanced with CrowdStrike MCP]
+            Beta[Beta-4: DevSecOps Security<br/>Container & K8s Assessment]
+            Gamma[Gamma: SOC Operations<br/>Incident Response & Hunting]
+            Delta[Delta: Red Team Operations<br/>Purple Team & Simulation]
+            Sigma[Sigma: Security Metrics<br/>ODM Tracking & Reporting]
         end
         
         subgraph "Core Services"
