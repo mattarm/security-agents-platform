@@ -1,0 +1,97 @@
+# Enterprise Topology Intelligence Configuration
+
+# Application settings
+app:
+  name: "Enterprise Topology Intelligence"
+  version: "1.0.0"
+  environment: "development"
+  debug: true
+
+# API settings
+api:
+  host: "0.0.0.0"
+  port: 8000
+  cors_origins: ["*"]
+  request_timeout: 300
+
+# Neo4j Knowledge Graph
+neo4j:
+  uri: "bolt://localhost:7687"
+  user: "neo4j"
+  password: "enterprise-topology"
+  max_connection_lifetime: 3600
+  max_connection_pool_size: 50
+  connection_timeout: 30
+
+# Platform integrations
+platforms:
+  jira:
+    enabled: false
+    base_url: "https://your-company.atlassian.net"
+    rate_limit: 100
+    timeout: 30
+    
+  confluence:
+    enabled: false
+    base_url: "https://your-company.atlassian.net/wiki"
+    rate_limit: 100
+    timeout: 30
+    
+  github:
+    enabled: false
+    organization: "your-org"
+    rate_limit: 5000
+    timeout: 30
+    
+  crowdstrike:
+    enabled: false
+    base_url: "https://api.crowdstrike.com"
+    rate_limit: 500
+    timeout: 30
+    
+  aws:
+    enabled: false
+    regions: ["us-east-1", "us-west-2"]
+    
+  azure:
+    enabled: false
+    
+  gcp:
+    enabled: false
+
+# Data processing
+kafka:
+  bootstrap_servers: ["localhost:9092"]
+  group_id: "enterprise-topology"
+  auto_offset_reset: "latest"
+
+redis:
+  url: "redis://localhost:6379"
+  db: 0
+  connection_pool_max_connections: 20
+
+# Analytics settings
+analytics:
+  batch_size: 100
+  max_concurrent_jobs: 5
+  retention_days: 365
+
+# Security settings
+security:
+  enable_auth: false  # Set to true in production
+  secret_key: "change-this-in-production"
+  token_expire_minutes: 60
+
+# Logging
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/enterprise-topology.log"
+  max_file_size: "100MB"
+  backup_count: 5
+
+# Monitoring
+monitoring:
+  metrics_enabled: true
+  health_check_interval: 30
+  prometheus_port: 9090

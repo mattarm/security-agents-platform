@@ -1,0 +1,52 @@
+# Enterprise Topology Intelligence - Python Dependencies
+
+# Core Framework
+fastapi==0.104.1
+uvicorn==0.24.0
+pydantic==2.5.0
+python-dotenv==1.0.0
+pyyaml==6.0.1
+
+# Knowledge Graph & Analytics
+neo4j==5.14.1
+networkx==3.2.1
+pandas==2.1.3
+numpy==1.25.2
+scikit-learn==1.3.2
+
+# Platform Integrations
+atlassian-python-api==3.41.5  # JIRA & Confluence
+PyGithub==2.1.1               # GitHub
+requests==2.31.0              # HTTP client
+httpx==0.25.2                 # Async HTTP
+
+# Data Processing
+kafka-python==2.0.2
+redis==5.0.1
+celery==5.3.4
+
+# API & Dashboard
+jinja2==3.1.2
+websockets==12.0
+aiofiles==23.2.1
+
+# Security & Auth
+cryptography==41.0.8
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# Monitoring & Logging
+prometheus-client==0.19.0
+structlog==23.2.0
+
+# Development & Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-mock==3.12.0
+black==23.11.0
+isort==5.12.0
+mypy==1.7.1
+
+# Visualization (for dashboard backend)
+plotly==5.17.0
+matplotlib==3.8.2
