@@ -11,6 +11,7 @@
 - **[PLATFORM-SUMMARY-ACCURATE.md](./PLATFORM-SUMMARY-ACCURATE.md)** - Detailed implementation summary with verified numbers
 - **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System architecture and component design
 - **[DEPLOYMENT-GUIDE.md](./DEPLOYMENT-GUIDE.md)** - Production deployment instructions
+- **[ENTERPRISE-DEPLOYMENT-STRATEGY.md](./ENTERPRISE-DEPLOYMENT-STRATEGY.md)** - Enterprise cold-start deployment strategy
 
 ### **🔍 Assessment & Analysis**
 - **[REALISTIC-VALUE-ASSESSMENT.md](./REALISTIC-VALUE-ASSESSMENT.md)** - Honest business value analysis
