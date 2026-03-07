@@ -105,7 +105,7 @@
 - **[Monitoring](./enhanced-analysis/monitoring_setup.py)** - Observability stack
 
 ### **🔧 Configuration**
-- **[Environment Setup](./crowdstrike-mcp-integration/.env.example)** - CrowdStrike MCP config
+- **[Environment Setup](./crowdstrike-mcp-integration/config/.env.example)** - CrowdStrike MCP config
 - **[Slack Configuration](./slack-war-rooms/.env.example)** - War room bot setup
 - **[API Configuration](./enhanced-analysis/config/config.example.yaml)** - API server config
 
