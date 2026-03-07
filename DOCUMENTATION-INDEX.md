@@ -12,11 +12,13 @@
 - **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System architecture and component design
 - **[DEPLOYMENT-GUIDE.md](./DEPLOYMENT-GUIDE.md)** - Production deployment instructions
 - **[ENTERPRISE-DEPLOYMENT-STRATEGY.md](./ENTERPRISE-DEPLOYMENT-STRATEGY.md)** - Enterprise cold-start deployment strategy
+- **[SCALE-OPERATIONS-FRAMEWORK.md](./SCALE-OPERATIONS-FRAMEWORK.md)** - Exception & risk management at scale with intelligent work distribution
 
 ### **🔍 Assessment & Analysis**
 - **[REALISTIC-VALUE-ASSESSMENT.md](./REALISTIC-VALUE-ASSESSMENT.md)** - Honest business value analysis
 - **[DOCUMENTATION-ASSESSMENT-REPORT.md](./DOCUMENTATION-ASSESSMENT-REPORT.md)** - Documentation quality review
 - **[SECURITY-COVERAGE-GAPS.md](./SECURITY-COVERAGE-GAPS.md)** - Security coverage analysis
+- **[Knowledge Graph Analysis](./analysis/KNOWLEDGE-GRAPH-ANALYSIS.md)** - Why knowledge graphs excel for scale operations
 
 ---
 
