@@ -1,0 +1,97 @@
+# AI/ML Engineering — Security Controls
+# Last Verified: 2026-02-15
+# Verified By: Cyber Defense Team
+
+model_pipeline_security:
+  model_registry_access_control:
+    status: deployed
+    tool: mlflow_iam
+    details: "Role-based access — separate read/write/deploy permissions"
+  training_pipeline_integrity:
+    status: partial
+    tool: custom_checksums
+    gap: "Training data hashed at ingestion — no end-to-end pipeline signing"
+  model_serving_auth:
+    status: deployed
+    method: mtls_iam
+    details: "Service-to-service auth for inference endpoints"
+  experiment_isolation:
+    status: deployed
+    method: eks_namespace_isolation
+    details: "Dev experiments isolated from production serving"
+
+agentic_ai_security:
+  agent_decision_logging:
+    status: deployed
+    tool: custom_audit_framework
+    scope: "All autonomous decisions — full context trace"
+  input_validation:
+    status: partial
+    tool: custom_validators
+    gap: "Basic input sanitization — no adversarial input detection"
+  output_guardrails:
+    status: partial
+    tool: rule_based_constraints
+    details: "Hard limits on dispatch distances, load weights"
+    gap: "No ML-based anomaly detection on outputs"
+  prompt_injection_defense:
+    status: not_deployed
+    severity: critical
+    gap: "Agentic systems accept structured inputs — no injection defense"
+  agent_rollback:
+    status: deployed
+    method: blue_green_model_serving
+    details: "Revert to previous model version within minutes"
+
+data_protection:
+  training_data_access:
+    status: deployed
+    tool: iam_s3_bucket_policies
+  model_weights_encryption:
+    status: deployed
+    tool: kms_encryption_at_rest
+  feature_store_logging:
+    status: deployed
+    tool: cloudtrail_custom_audit
+  pii_in_training_data:
+    status: partial
+    gap: "PII detection in ingestion pipeline — historical datasets not fully scanned"
+
+infrastructure:
+  gpu_monitoring:
+    status: deployed
+    tool: crowdstrike_custom_metrics
+    details: "Cryptomining detection on GPU instances"
+  notebook_hardening:
+    status: partial
+    details: "Network isolation deployed"
+    gap: "No mandatory image scanning for custom notebook images"
+  container_security:
+    status: deployed
+    details: "Same controls as platform (Falcon Container, ECR scanning)"
+
+gaps:
+  - id: GAP-ML-001
+    control: prompt_injection_defense
+    severity: critical
+    description: "No prompt injection defense on agentic systems"
+    remediation: "Input filtering + adversarial detection"
+    target_date: "2026-06-30"
+  - id: GAP-ML-002
+    control: adversarial_robustness_testing
+    severity: high
+    description: "No regular adversarial testing cadence"
+    remediation: "Quarterly red team exercises with Delta agent"
+    target_date: "2026-06-30"
+  - id: GAP-ML-003
+    control: training_pipeline_signing
+    severity: high
+    description: "No end-to-end integrity verification for ML pipeline"
+    remediation: "ML supply chain security framework"
+    target_date: "2026-09-30"
+  - id: GAP-ML-004
+    control: pii_scanning_historical
+    severity: medium
+    description: "Historical training datasets not fully scanned for PII"
+    remediation: "Retroactive PII scan"
+    target_date: "2026-06-30"

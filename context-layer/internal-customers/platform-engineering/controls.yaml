@@ -1,0 +1,101 @@
+# Platform Engineering — Security Controls
+# Last Verified: 2026-03-01
+# Verified By: Cyber Defense Team
+
+endpoint_runtime:
+  edr:
+    status: deployed
+    tool: crowdstrike_falcon
+    scope: "All EC2 instances and EKS nodes"
+  container_runtime:
+    status: deployed
+    tool: crowdstrike_falcon_container
+    scope: "EKS pod-level monitoring"
+  waf:
+    status: deployed
+    tool: aws_waf
+    scope: "API gateway and customer portal"
+  ddos:
+    status: deployed
+    tool: aws_shield_standard
+    scope: "CloudFront distribution"
+
+application_security:
+  sast:
+    status: deployed
+    tool: github_advanced_security_codeql
+    scope: all_platform_repos
+  secret_scanning:
+    status: deployed
+    tool: ghas_secret_scanning
+    push_protection: true
+    scope: org_wide
+  dependency_scanning:
+    status: deployed
+    tool: dependabot
+    auto_pr: critical_high
+  container_image_scanning:
+    status: deployed
+    tool: ecr_image_scanning
+    block_policy: critical_cves
+  api_security_testing:
+    status: partial
+    tool: manual_pen_testing
+    cadence: quarterly
+    gap: "No continuous API security testing — manual only"
+
+data_protection:
+  encryption_at_rest:
+    status: deployed
+    tool: aws_kms_cmk
+    scope: [rds, s3, ebs]
+  encryption_in_transit:
+    status: deployed
+    external_min_tls: "1.3"
+    internal_min_tls: "1.2"
+  pii_tokenization:
+    status: deployed
+    scope: "Customer PII tokenized in analytics pipelines"
+  database_access_logging:
+    status: deployed
+    tool: rds_audit_logging_cloudtrail
+  backup_encryption:
+    status: deployed
+    details: "Encrypted snapshots with cross-region replication"
+
+access_control:
+  sso:
+    status: deployed
+    tool: okta
+    mfa_required: true
+  database_access:
+    status: deployed
+    method: iam_authenticated_rds
+    password_auth: false
+  api_authentication:
+    status: deployed
+    method: oauth2_jwt
+  secrets_management:
+    status: deployed
+    tool: aws_secrets_manager
+    auto_rotation: rds_credentials
+
+gaps:
+  - id: GAP-PE-001
+    control: api_security_testing
+    severity: high
+    description: "No continuous DAST/fuzzing — only manual quarterly pen tests"
+    remediation: "Continuous API fuzzing in CI/CD"
+    target_date: "2026-06-30"
+  - id: GAP-PE-002
+    control: rasp
+    severity: medium
+    description: "No runtime application self-protection"
+    remediation: "Under evaluation"
+    target_date: null
+  - id: GAP-PE-003
+    control: dlp
+    severity: medium
+    description: "No DLP controls on outbound API responses"
+    remediation: "Risk accepted — see risk.md RISK-PE-003"
+    target_date: null

@@ -1,0 +1,113 @@
+# AI/ML Engineering — Agent Operating Protocol
+# Last Verified: 2026-03-09
+# Verified By: Cyber Defense Team
+
+scope:
+  team: ai-ml-engineering
+  environments:
+    - production-serving
+    - ml-training
+    - experimentation
+  aws_accounts:
+    production: "123456789014"
+    ml_training: "123456789015"
+  services:
+    - agentic-dispatch
+    - route-optimizer
+    - demand-forecasting
+    - warehouse-agents
+    - ml-platform
+    - model-serving
+
+autonomy:
+  production_agentic_systems:
+    # Dispatch, routing, warehouse — autonomous decisions affecting physical world
+    autonomous:
+      - alert_enrichment
+      - anomaly_detection_agent_decisions
+      - jira_ticket_creation
+
+    human_approved:
+      - model_serving_isolation:
+          approvers: [ai_ml_lead, soc_lead]
+          notify: ["#ml-oncall", "#security-incidents"]
+      - agent_system_shutdown:
+          approvers: [head_of_ai_ml, vp_engineering]
+          notify: ["#ml-oncall", "#security-incidents", "#platform-oncall"]
+      - training_pipeline_halt:
+          approvers: [ml_platform_lead]
+      - feature_store_access_revocation:
+          approvers: [ai_ml_lead]
+
+    prohibited:
+      - model_rollback              # ML team only — requires model validation
+      - model_weight_modification
+      - training_data_modification
+      - production_adversarial_testing
+
+  ml_training:
+    autonomous:
+      - training_data_integrity_monitoring
+      - experiment_environment_scanning
+      - gpu_cryptomining_detection
+      - notebook_server_isolation
+
+    human_approved:
+      - training_job_termination:
+          approvers: [ml_platform_lead]
+          description: "Alpha-4 proposes on suspected poisoning, ML Lead decides"
+
+  adversarial_testing:
+    # Delta red team operations
+    autonomous:
+      - adversarial_input_testing_staging_only
+
+    human_approved:
+      - prompt_injection_testing:
+          approvers: [ai_safety_lead]
+          constraints: [scoped, time_boxed]
+      - model_extraction_testing:
+          approvers: [ai_safety_lead]
+          constraints: [scoped, time_boxed]
+
+    prohibited:
+      - production_adversarial_testing  # Never against live customer-affecting systems
+
+escalation:
+  suspected_data_poisoning:
+    severity: p0
+    channels: ["#ml-oncall", "#security-incidents"]
+    page: [ai_safety_lead, soc_lead]
+    immediate_action: halt_affected_training_pipeline
+  anomalous_agent_decisions:
+    severity: p1
+    channels: ["#ml-oncall", "#security-incidents"]
+    action: alert_only_no_auto_remediate
+    description: "ML team investigates — do not auto-remediate"
+  model_supply_chain_compromise:
+    severity: p0
+    channels: ["#ml-oncall", "#security-incidents"]
+    immediate_action: halt_deployments_from_affected_pipeline
+  prompt_injection_detected:
+    severity: p1
+    action: log_block_alert
+    description: "Do not disclose detection mechanism"
+
+red_flags:
+  - anomalous_agent_decision_physical_world_impact
+  - training_data_manipulation_evidence
+  - unauthorized_model_deployment
+  - adversarial_query_pattern_model_extraction
+  - ai_regulatory_compliance_finding
+
+confidence_thresholds:
+  auto_execute_above: 0.95
+  propose_and_wait_above: 0.7
+  human_review_below: 0.7
+  block_below: 0.3
+
+boundaries:
+  - "Must NOT modify models, weights, or training data"
+  - "Must NOT roll back models — ML team validates before any rollback"
+  - "Must NOT access raw training datasets — metadata and integrity checksums only"
+  - "All adversarial testing must be pre-scoped and time-boxed with ML team awareness"

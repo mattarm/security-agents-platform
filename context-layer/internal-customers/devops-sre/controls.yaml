@@ -1,0 +1,130 @@
+# DevOps/SRE — Security Controls
+# Last Verified: 2026-03-01
+# Verified By: Cyber Defense Team
+
+cloud_security_posture:
+  security_hub:
+    status: deployed
+    tool: aws_security_hub
+    frameworks: [cis, pci]
+    scope: all_accounts_aggregated
+  guardduty:
+    status: deployed
+    tool: aws_guardduty
+    scope: all_accounts
+    findings_route: siem
+  aws_config:
+    status: deployed
+    tool: aws_config_rules
+    purpose: "Infrastructure drift detection"
+  cloudtrail:
+    status: deployed
+    scope: multi_account_multi_region
+    storage: "Immutable logs in dedicated S3 bucket"
+  vpc_flow_logs:
+    status: deployed
+    scope: all_vpcs
+    sampling: true
+    destination: siem
+
+identity_access:
+  sso_mfa:
+    status: deployed
+    tool: okta_aws_sso
+    mfa: hardware_for_admin_roles
+  jit_access:
+    status: deployed
+    tool: okta_approval_workflow
+    standing_admin_access: false
+  service_account_rotation:
+    status: partial
+    automated: [rds]
+    manual: [third_party_integrations]
+    gap: "4 service accounts with static credentials >90 days"
+  root_account:
+    status: deployed
+    mfa: hardware_token
+    api_keys: none
+    alerting: any_root_activity
+
+container_kubernetes:
+  node_hardening:
+    status: deployed
+    details: "CIS-hardened AMIs, auto-patching"
+  pod_security_standards:
+    status: deployed
+    level: restricted
+    enforced: [no_privileged, no_hostpath, no_root]
+  network_policies:
+    status: deployed
+    tool: calico
+    default: deny
+  image_signing:
+    status: partial
+    scanning: deployed_ecr
+    signing: not_deployed
+    gap: "No image signature verification (cosign)"
+  runtime_protection:
+    status: deployed
+    tool: crowdstrike_falcon_container
+
+ci_cd:
+  secret_detection:
+    status: deployed
+    tool: ghas_push_protection_precommit
+  pipeline_security:
+    status: deployed
+    tool: github_actions_oidc
+    details: "No long-lived credentials"
+  iac_scanning:
+    status: deployed
+    tool: checkov
+    scope: terraform_in_ci
+  dependency_scanning:
+    status: deployed
+    tool: dependabot_ghas
+  artifact_integrity:
+    status: partial
+    details: "Container images tagged by SHA"
+    gap: "No SLSA provenance attestation"
+
+network:
+  vpc_segmentation:
+    status: deployed
+    details: "Production, staging, dev in separate VPCs"
+  private_subnets:
+    status: deployed
+    details: "No direct internet access for production workloads"
+  vpc_endpoints:
+    status: deployed
+    services: [s3, ecr, kms, sts, cloudwatch]
+  zero_trust_service_mesh:
+    status: not_deployed
+    severity: high
+    gap: "Services authenticate via network position, not identity"
+
+gaps:
+  - id: GAP-SRE-001
+    control: zero_trust_service_mesh
+    severity: high
+    description: "No mTLS between services — authentication by network position"
+    remediation: "Istio service mesh deployment"
+    target_date: "2026-12-31"
+  - id: GAP-SRE-002
+    control: image_signing
+    severity: medium
+    description: "Container images not signed, no admission controller verification"
+    remediation: "Cosign + Kyverno"
+    target_date: "2026-06-30"
+  - id: GAP-SRE-003
+    control: slsa_provenance
+    severity: medium
+    description: "No supply chain integrity attestation for build artifacts"
+    remediation: "SLSA Level 2 provenance"
+    target_date: "2026-09-30"
+  - id: GAP-SRE-004
+    control: service_account_rotation
+    severity: high
+    description: "4 service accounts with static long-lived credentials"
+    remediation: "OIDC migration for remaining accounts"
+    target_date: "2026-06-30"

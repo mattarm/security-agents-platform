@@ -1,0 +1,57 @@
+# [Team Name] — Agent Operating Protocol
+# Last Verified: YYYY-MM-DD
+# Verified By: —
+
+scope:
+  team: ""
+  environments: []
+  aws_accounts: {}
+  services: []
+
+autonomy:
+  production:
+    autonomous:
+      - alert_enrichment
+      - severity_scoring
+      - jira_ticket_creation
+
+    human_approved: {}
+      # - action_name:
+      #     approvers: [role1, role2]
+      #     notify: ["#channel"]
+
+    prohibited: []
+
+  staging:
+    autonomous:
+      - alert_enrichment
+      - host_isolation
+      - container_termination
+      - vulnerability_scanning
+
+escalation:
+  p0_critical:
+    channels: []
+    page: []
+    response_sla_minutes: 15
+  p1_high:
+    channels: []
+    response_sla_minutes: 60
+  p2_medium:
+    jira_auto_create: true
+    response_sla_hours: 24
+  p3_low:
+    jira_auto_create: true
+    response_sla_days: 7
+
+red_flags: []
+  # Conditions that halt automation and require human judgment
+
+confidence_thresholds:
+  auto_execute_above: 0.95
+  propose_and_wait_above: 0.7
+  human_review_below: 0.7
+  block_below: 0.3
+
+boundaries: []
+  # What agents must NOT do in this customer's domain

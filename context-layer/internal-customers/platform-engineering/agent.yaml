@@ -1,0 +1,96 @@
+# Platform Engineering — Agent Operating Protocol
+# Last Verified: 2026-03-09
+# Verified By: Cyber Defense Team
+
+scope:
+  team: platform-engineering
+  environments:
+    - production
+    - staging
+  aws_accounts:
+    production: "123456789012"
+    staging: "123456789013"
+  services:
+    - routing-engine
+    - dispatch-service
+    - tracking-service
+    - customer-portal
+    - billing-service
+    - platform-api-gateway
+
+autonomy:
+  production:
+    autonomous:
+      - alert_enrichment
+      - severity_scoring
+      - sla_assignment
+      - jira_ticket_creation
+      - ghas_alert_triage
+      - dependency_vulnerability_alerting
+      - pr_blocking_critical_high
+
+    human_approved:
+      - host_isolation:
+          approvers: [soc_analyst, platform_oncall]
+          notify: ["#security-incidents", "#platform-oncall"]
+      - network_containment:
+          approvers: [soc_analyst, infra_oncall]
+          notify: ["#security-incidents", "#infra-oncall"]
+      - api_rate_limit_override:
+          approvers: [platform_oncall]
+      - dns_sinkholing:
+          approvers: [soc_lead]
+      - database_access_revocation:
+          approvers: [platform_eng_vp, soc_lead]
+      - build_pipeline_halt:
+          approvers: [platform_eng_lead]
+          description: "Beta-4 proposes, Platform Eng decides"
+
+    prohibited:
+      - service_rollback        # SRE only
+      - database_schema_changes
+      - application_code_modification
+      - direct_customer_communication
+
+  staging:
+    autonomous:
+      - alert_enrichment
+      - severity_scoring
+      - host_isolation
+      - container_termination
+      - network_containment
+      - vulnerability_scanning
+
+escalation:
+  p0_critical:
+    channels: ["#security-incidents", "#platform-oncall"]
+    page: [platform_oncall, soc_lead]
+    response_sla_minutes: 15
+  p1_high:
+    channels: ["#security-findings"]
+    response_sla_minutes: 60
+  p2_medium:
+    jira_auto_create: true
+    response_sla_hours: 24
+  p3_low:
+    jira_auto_create: true
+    response_sla_days: 7
+
+red_flags:
+  - customer_visible_disruption
+  - customer_data_exfiltration
+  - active_adversary_in_production
+  - pci_scope_impact
+  - billing_service_containment
+
+confidence_thresholds:
+  auto_execute_above: 0.95
+  propose_and_wait_above: 0.7
+  human_review_below: 0.7
+  block_below: 0.3
+
+boundaries:
+  - "Must NOT access customer data directly — metadata and telemetry only"
+  - "Must NOT modify application code or configuration"
+  - "Must NOT communicate directly with external customers"
+  - "All production actions logged to immutable audit trail"

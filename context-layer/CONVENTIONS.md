@@ -19,20 +19,33 @@ Status: Active | Draft | Stale
 - Staleness triggers: Sigma generates a finding in `findings.md` and an entry in `risk.md`
 - Refresh triggers: QBR, compliance audit, incident, champion/contact change, architecture change
 
+## File Format Conventions
+
+Artifacts use the format best suited to their consumer:
+
+| Format | Files | Why |
+|--------|-------|-----|
+| **Markdown** | profile.md, roadmap.md, engagement.md, outcomes.md, findings.md, risk.md, playbooks.md | Human-authored narrative, judgment, nuance — read by humans and reasoning agents |
+| **YAML** | agent.yaml, controls.yaml, sla.yaml | Agent execution config — parsed deterministically at decision time, no ambiguity |
+| **JSON** | links.json | Machine-readable system identifiers — API-style lookups |
+
+Markdown artifacts use YAML frontmatter for metadata (`Last Verified`, `Status`). YAML artifacts use comment headers.
+
 ## Update Patterns
 
 | Artifact | Pattern | Rule |
 |----------|---------|------|
 | `profile.md` | **Edit in place** | Curated profile; overwrite with current state |
-| `controls.md` | **Edit in place** | Reflects current deployed controls |
+| `controls.yaml` | **Edit in place** | Reflects current deployed controls |
 | `roadmap.md` | **Edit in place** | Living document, updated quarterly minimum |
 | `engagement.md` | **Edit in place** | Current cadence and active initiatives |
 | `outcomes.md` | **Append-only** | New entries prepended with date; never delete history |
 | `findings.md` | **Append-only** | Findings can be marked Resolved but never removed |
 | `risk.md` | **Close, never delete** | Risks get status changes (Active → Mitigated → Accepted → Closed) |
-| `agent.md` | **Edit in place** | Reflects current autonomy configuration |
+| `agent.yaml` | **Edit in place** | Reflects current autonomy configuration |
 | `playbooks.md` | **Edit in place** | Updated as procedures change |
 | `links.json` | **Edit in place** | Updated when system IDs change |
+| `sla.yaml` | **Edit in place** | Shared baseline; per-customer overrides in agent.yaml |
 
 ## Facts vs. Hypotheses
 
@@ -57,7 +70,7 @@ Agents must know which system is authoritative for which data:
 | Cloud posture | AWS Security Hub / Config | Summarize posture |
 | Curated posture narrative | **This repo** | Source of truth |
 | Strategic security decisions | **This repo** | Source of truth |
-| Autonomy and governance | **This repo** (`agent.md`) | Source of truth |
+| Autonomy and governance | **This repo** (`agent.yaml`) | Source of truth |
 
 ## Naming Conventions
 
@@ -72,6 +85,7 @@ Agents must know which system is authoritative for which data:
 2. Copy all files from `templates/`, removing the `_` prefix
 3. Fill in `profile.md` as the first artifact (other artifacts reference it)
 4. Set `Last Verified` to current date on `profile.md`, `Not yet verified` on others
-5. Review `agent.md` defaults and adjust autonomy tiers
+5. Review `agent.yaml` defaults and adjust autonomy tiers
 6. Populate `links.json` with actual system identifiers
-7. Register in Intelligence Fusion Engine routing config
+7. Conduct intake questionnaire (see `INTAKE-QUESTIONNAIRE.md`)
+8. Register in Intelligence Fusion Engine routing config

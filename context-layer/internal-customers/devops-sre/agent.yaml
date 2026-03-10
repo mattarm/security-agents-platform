@@ -1,0 +1,121 @@
+# DevOps/SRE — Agent Operating Protocol
+# Last Verified: 2026-03-09
+# Verified By: Cyber Defense Team
+
+scope:
+  team: devops-sre
+  environments:
+    - production
+    - staging
+    - development
+    - shared-services
+  aws_accounts:
+    management: "123456789010"
+    security: "123456789011"
+    shared_services: "123456789016"
+    production: "123456789012"
+    staging: "123456789013"
+  services:
+    - eks-clusters
+    - ci-cd-pipelines
+    - container-registry
+    - secrets-management
+    - dns-cdn
+    - observability-stack
+    - vpn-networking
+
+autonomy:
+  production:
+    autonomous:
+      - alert_enrichment
+      - guardduty_finding_triage
+      - security_hub_finding_triage
+      - jira_ticket_creation
+      - compromised_credential_rotation  # Pre-approved — rotate immediately on detection
+
+    human_approved:
+      - security_group_modification:
+          approvers: [sre_oncall, soc_analyst]
+      - iam_policy_change:
+          approvers: [sre_lead, soc_lead]
+      - eks_pod_termination:
+          approvers: [sre_oncall]
+      - aws_account_isolation:
+          approvers: [head_of_infrastructure, ciso]
+      - container_image_blocking_high:
+          approvers: [sre_lead]
+          description: "Critical CVEs blocked autonomously; High requires approval"
+      - pipeline_halt:
+          approvers: [sre_lead]
+          description: "Beta-4 proposes, SRE Lead decides"
+
+    prohibited:
+      - route53_dns_changes       # Customer-impacting — SRE only
+      - terraform_state_modification  # Never — GitOps only
+      - vault_root_token_access
+      - observability_config_changes  # Could blind responders
+
+  staging:
+    autonomous:
+      - alert_enrichment
+      - security_group_modification
+      - pod_termination
+      - iam_credential_rotation_service_accounts
+      - infrastructure_scanning
+
+  ci_cd:
+    autonomous:
+      - pipeline_security_scanning
+      - secret_detection
+      - github_actions_workflow_review
+      - container_image_blocking_critical  # Auto-block Critical CVEs
+
+    human_approved:
+      - container_image_blocking_high:
+          approvers: [sre_lead]
+
+escalation:
+  compromised_aws_credentials:
+    severity: p0
+    channels: ["#infra-oncall", "#security-incidents"]
+    page: [sre_lead, soc_lead]
+    immediate_action: rotate_credential
+    description: "Credential rotation is pre-approved autonomous action"
+  unauthorized_iam_changes:
+    severity: p0
+    channels: ["#infra-oncall", "#security-incidents"]
+    page: [sre_lead, soc_lead]
+    action: halt_and_investigate
+  kubernetes_compromise:
+    severity: p1
+    channels: ["#infra-oncall"]
+    action: propose_containment_await_approval
+  infrastructure_drift:
+    severity: p2
+    jira_auto_create: true
+    description: "Flag for next Terraform plan/apply cycle"
+  secret_exposure_in_repo:
+    severity: p1
+    channels: ["#infra-oncall"]
+    immediate_action: auto_rotate_if_automated
+
+red_flags:
+  - cross_service_outage_risk
+  - production_network_topology_changes
+  - broad_iam_policy_changes  # AdministratorAccess, PowerUser
+  - terraform_state_access
+  - dns_or_cdn_configuration_changes
+  - lateral_movement_from_infrastructure
+
+confidence_thresholds:
+  auto_execute_above: 0.95
+  propose_and_wait_above: 0.7
+  human_review_below: 0.7
+  block_below: 0.3
+
+boundaries:
+  - "Must NOT modify Terraform state or IaC code directly"
+  - "Must NOT make DNS changes"
+  - "Must NOT access Vault root tokens or master keys"
+  - "Must NOT modify observability configuration"
+  - "All infrastructure actions logged to CloudTrail and immutable audit trail"

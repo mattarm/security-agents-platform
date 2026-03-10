@@ -1,0 +1,53 @@
+# Vulnerability SLA Configuration
+# Shared baseline — per-customer overrides in their agent.yaml
+# Referenced by: Beta-4 (findings), Gamma (triage), Sigma (compliance tracking)
+
+vulnerability_slas:
+  critical:
+    remediation_days: 14
+    escalation_after_days: 7
+    auto_assign: true
+    auto_create_jira: true
+  high:
+    remediation_days: 30
+    escalation_after_days: 14
+    auto_assign: true
+    auto_create_jira: true
+  medium:
+    remediation_days: 120
+    escalation_after_days: 60
+    auto_create_jira: true
+  low:
+    remediation_days: 365
+    escalation_after_days: 180
+    auto_create_jira: false
+
+# Global overrides — applied before customer-specific overrides
+overrides:
+  cisa_kev:
+    max_remediation_days: 14
+    priority: critical
+    override_reason: "CISA Known Exploited Vulnerability"
+  epss_threshold:
+    score: 0.5
+    action: escalate_to_critical
+
+# Environment-based SLA multipliers
+environment_multipliers:
+  internet_facing_production:
+    sla_multiplier: 0.5    # Cut SLAs in half
+  internal_production:
+    sla_multiplier: 1.0    # Standard SLAs
+  staging:
+    sla_multiplier: 2.0    # Double SLAs
+  development:
+    sla_multiplier: 4.0    # 4x SLAs
+
+# Compliance-scope multipliers (stacks with environment)
+compliance_multipliers:
+  pci_scope:
+    sla_multiplier: 0.5
+    reason: "PCI-DSS cardholder data environment"
+  gdpr_scope:
+    sla_multiplier: 0.75
+    reason: "GDPR personal data processing"

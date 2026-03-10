@@ -1,0 +1,34 @@
+# [Team Name] — Security Controls
+# Last Verified: Not yet verified
+# Verified By: —
+
+# endpoint_runtime:
+#   control_name:
+#     status: deployed | partial | not_deployed
+#     tool: tool_name
+#     scope: "description"
+
+# application_security:
+#   control_name:
+#     status: deployed | partial | not_deployed
+#     tool: tool_name
+#     scope: "description"
+#     gap: "description of gap if partial"
+
+# data_protection:
+#   control_name:
+#     status: deployed | partial | not_deployed
+#     details: "description"
+
+# access_control:
+#   control_name:
+#     status: deployed | partial | not_deployed
+#     details: "description"
+
+gaps: []
+  # - id: GAP-XX-NNN
+  #   control: control_name
+  #   severity: critical | high | medium | low
+  #   description: "What is missing"
+  #   remediation: "What will fix it"
+  #   target_date: "YYYY-MM-DD"
