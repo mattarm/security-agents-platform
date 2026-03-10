@@ -1,0 +1,35 @@
+{
+  "org_id": "",
+  "crowdstrike": {
+    "host_group_id": "",
+    "policy_id": "",
+    "dashboard": ""
+  },
+  "aws": {
+    "production_account_id": "",
+    "staging_account_id": "",
+    "region": ""
+  },
+  "github": {
+    "org": "",
+    "repos": []
+  },
+  "jira": {
+    "project_key": "",
+    "security_epic": "",
+    "board_url": ""
+  },
+  "okta": {
+    "group_id": "",
+    "app_assignments": []
+  },
+  "slack": {
+    "team_channel": "",
+    "oncall_channel": "",
+    "security_channel": ""
+  },
+  "pagerduty": {
+    "service_id": "",
+    "escalation_policy": ""
+  }
+}

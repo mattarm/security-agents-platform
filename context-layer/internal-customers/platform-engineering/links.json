@@ -1,0 +1,47 @@
+{
+  "org_id": "platform-engineering",
+  "crowdstrike": {
+    "host_group_id": "hg-platform-prod-001",
+    "policy_id": "pol-platform-001",
+    "dashboard": "https://falcon.crowdstrike.com/dashboards/platform-eng"
+  },
+  "aws": {
+    "production_account_id": "123456789012",
+    "staging_account_id": "123456789013",
+    "region": "us-east-1"
+  },
+  "github": {
+    "org": "logistics-corp",
+    "repos": [
+      "logistics-platform-core",
+      "routing-engine",
+      "dispatch-service",
+      "tracking-service",
+      "customer-portal",
+      "platform-api-gateway"
+    ],
+    "ghas_dashboard": "https://github.com/orgs/logistics-corp/security"
+  },
+  "jira": {
+    "project_key": "PLAT",
+    "security_epic": "SEC-2026-PLATFORM",
+    "board_url": "https://logistics-corp.atlassian.net/jira/software/projects/PLAT/boards/12"
+  },
+  "okta": {
+    "group_id": "00g-platform-eng",
+    "app_assignments": ["logistics-saas-prod", "logistics-saas-staging", "aws-sso"]
+  },
+  "slack": {
+    "team_channel": "#platform-engineering",
+    "oncall_channel": "#platform-oncall",
+    "security_channel": "#security-findings"
+  },
+  "pagerduty": {
+    "service_id": "P-PLATFORM-001",
+    "escalation_policy": "EP-PLATFORM-001"
+  },
+  "monitoring": {
+    "grafana_dashboard": "https://grafana.internal/d/platform-security",
+    "prometheus_namespace": "platform-prod"
+  }
+}

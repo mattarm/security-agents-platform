@@ -1,0 +1,47 @@
+{
+  "org_id": "ai-ml-engineering",
+  "crowdstrike": {
+    "host_group_id": "hg-ml-gpu-001",
+    "policy_id": "pol-ml-001",
+    "dashboard": "https://falcon.crowdstrike.com/dashboards/ml-eng"
+  },
+  "aws": {
+    "production_account_id": "123456789014",
+    "ml_training_account_id": "123456789015",
+    "region": "us-east-1"
+  },
+  "github": {
+    "org": "logistics-corp",
+    "repos": [
+      "agentic-dispatch",
+      "route-optimizer",
+      "demand-forecasting",
+      "warehouse-agents",
+      "ml-platform",
+      "agent-framework"
+    ]
+  },
+  "jira": {
+    "project_key": "MLENG",
+    "security_epic": "SEC-2026-ML",
+    "board_url": "https://logistics-corp.atlassian.net/jira/software/projects/MLENG/boards/18"
+  },
+  "okta": {
+    "group_id": "00g-ml-engineering",
+    "app_assignments": ["ml-platform-prod", "sagemaker", "aws-sso"]
+  },
+  "slack": {
+    "team_channel": "#ai-ml-engineering",
+    "oncall_channel": "#ml-oncall",
+    "security_channel": "#security-findings"
+  },
+  "pagerduty": {
+    "service_id": "P-ML-001",
+    "escalation_policy": "EP-ML-001"
+  },
+  "ml_platform": {
+    "mlflow_url": "https://mlflow.internal",
+    "model_registry": "https://mlflow.internal/models",
+    "feature_store": "https://feast.internal"
+  }
+}
