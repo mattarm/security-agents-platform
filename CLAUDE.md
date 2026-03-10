@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 SecurityAgents Platform is an enterprise cyber defense platform built to scale a Cyber Defense team through AI-powered automation and agentic delivery. The platform coordinates five specialized security agents through an intelligence fusion architecture, integrating with CrowdStrike, Okta, Panther SIEM, AWS, and 10 GitHub-hosted security tools (CALDERA, TheHive, BloodHound, etc.).
 
-**Current state**: Core agents and integrations are implemented. Test coverage is a critical gap — see `TEST-COVERAGE-REQUIREMENTS.md` for the honest assessment. The platform needs a context layer established to enable agentic delivery at scale.
+**Current state**: Core agents and integrations are implemented. Test coverage is a critical gap — see `docs/TEST-COVERAGE-REQUIREMENTS.md` for the honest assessment. The context layer (`context-layer/`) establishes internal engineering teams as security customers with persistent, agent-readable artifacts.
 
 ## Architecture
 
