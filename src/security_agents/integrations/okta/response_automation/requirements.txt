@@ -1,0 +1,59 @@
+# Core Dependencies
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+aiohttp==3.9.0
+asyncio-throttle==1.0.2
+
+# Configuration and Environment
+PyYAML==6.0.1
+python-dotenv==1.0.0
+
+# HTTP and API clients
+httpx==0.25.2
+requests==2.31.0
+
+# Authentication and Security
+cryptography==41.0.8
+PyJWT==2.8.0
+passlib[bcrypt]==1.7.4
+
+# Database (if needed for persistent storage)
+# asyncpg==0.29.0
+# sqlalchemy[asyncio]==2.0.23
+
+# Logging and Monitoring
+structlog==23.2.0
+prometheus-client==0.19.0
+
+# Date and Time
+python-dateutil==2.8.2
+
+# Retry and Circuit Breaker patterns
+tenacity==8.2.3
+backoff==2.2.1
+
+# Email functionality
+aiosmtplib==3.0.1
+
+# JSON Web Tokens for API auth
+python-jose[cryptography]==3.3.0
+
+# Testing (development)
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-mock==3.12.0
+httpx==0.25.2  # for testing FastAPI
+
+# Development tools
+black==23.11.0
+flake8==6.1.0
+mypy==1.7.1
+
+# Optional: Redis for caching/session storage
+# redis==5.0.1
+# aioredis==2.0.1
+
+# Optional: Message queue support
+# celery==5.3.4
+# kombu==5.3.4
