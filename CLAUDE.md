@@ -6,29 +6,47 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 SecurityAgents Platform is an enterprise cyber defense platform built to scale a Cyber Defense team through AI-powered automation and agentic delivery. The platform coordinates five specialized security agents through an intelligence fusion architecture, integrating with CrowdStrike, Okta, Panther SIEM, AWS, and 10 GitHub-hosted security tools (CALDERA, TheHive, BloodHound, etc.).
 
-**Current state**: Core agents and integrations are implemented. Test coverage is a critical gap — see `docs/TEST-COVERAGE-REQUIREMENTS.md` for the honest assessment. The context layer (`context-layer/`) establishes internal engineering teams as security customers with persistent, agent-readable artifacts.
+**Current state**: Core agents and integrations are implemented. Test coverage is a critical gap — see `docs/TEST-COVERAGE-REQUIREMENTS.md` for the honest assessment. The context layer (`src/security_agents/core/context-layer/`) establishes internal engineering teams as security customers with persistent, agent-readable artifacts.
+
+## Repository Layout
+
+```
+security-agents-platform/
+├── src/security_agents/          # Main package
+│   ├── core/                     # Fusion engine, orchestrator, API server, config
+│   ├── agents/                   # Agent definitions and routing
+│   │   └── engines/              # Agent engine source files (Alpha-4, Beta-4, Gamma, Delta, Sigma)
+│   ├── skills/                   # Per-agent skill modules (CrowdStrike MCP, etc.)
+│   └── integrations/             # External service integrations (IAM, SecOps, Slack, Topology)
+├── tests/                        # All test suites
+├── infrastructure/               # Terraform modules for AWS (VPC, KMS, monitoring)
+├── deploy/                       # Docker Compose files and deployment configs
+├── docs/                         # Project documentation
+├── archive/                      # Legacy/deprecated code
+└── pyproject.toml                # Package config, pytest settings, tool configs
+```
 
 ## Architecture
 
 ### Core Pattern: Intelligence Fusion
-All agents communicate through the Intelligence Fusion Engine (`enhanced-analysis/intelligence_fusion_engine.py`), which performs cross-domain threat correlation using Intelligence Packets. The Agent Orchestrator (`enhanced-analysis/agent_orchestration_system.py`) coordinates multi-agent task execution with dependency management. The Production API Server (`enhanced-analysis/production_api_server.py`) exposes everything via FastAPI with JWT/OAuth 2.0 auth.
+All agents communicate through the Intelligence Fusion Engine (`src/security_agents/core/intelligence_fusion_engine.py`), which performs cross-domain threat correlation using Intelligence Packets. The Agent Orchestrator (`src/security_agents/core/agent_orchestration_system.py`) coordinates multi-agent task execution with dependency management. The Production API Server (`src/security_agents/core/production_api_server.py`) exposes everything via FastAPI with JWT/OAuth 2.0 auth.
 
 ### Agent Ecosystem
 | Agent | Location | Role |
 |-------|----------|------|
-| Alpha-4 | `enhanced-analysis/tiger_team_alpha_4.py` | Threat intelligence (OSINT, IOC analysis, campaign attribution) |
-| Beta-4 | `enhanced-analysis/tiger_team_beta_4.py` | DevSecOps (SAST, container scanning, IaC security) |
-| Gamma | `agents/gamma_blue_team_agent.py` | SOC operations (incident response, threat hunting, TheHive) |
-| Delta | `agents/delta_red_team_agent.py` | Red team (CALDERA, BloodHound, attack simulation) |
-| Sigma | `agents/sigma_metrics_agent.py` | Security metrics and program tracking |
+| Alpha-4 | `src/security_agents/agents/engines/tiger_team_alpha_4.py` | Threat intelligence (OSINT, IOC analysis, campaign attribution) |
+| Beta-4 | `src/security_agents/agents/engines/tiger_team_beta_4.py` | DevSecOps (SAST, container scanning, IaC security) |
+| Gamma | `src/security_agents/agents/engines/gamma_blue_team_agent.py` | SOC operations (incident response, threat hunting, TheHive) |
+| Delta | `src/security_agents/agents/engines/delta_red_team_agent.py` | Red team (CALDERA, BloodHound, attack simulation) |
+| Sigma | `src/security_agents/agents/engines/sigma_metrics_agent.py` | Security metrics and program tracking |
 
 ### Key Subsystems
-- **CrowdStrike MCP Integration** (`crowdstrike-mcp-integration/`): MCP client framework with per-agent skill modules in `skills/`
-- **IAM Security** (`iam-security/`): Okta integration, behavioral analytics (Isolation Forest ML), automated response, dual SIEM forwarding (Panther/CrowdStrike)
-- **SecOps AI Orchestration** (`secops-ai-orchestration/`): AI confidence engine, autonomy tiers (0-3), governance controls with SOC2/ISO compliance tests
-- **Slack War Rooms** (`slack-war-rooms/`): SOC collaboration bot
-- **Enterprise Topology** (`enterprise-topology/`): Technology stack mapping and analysis
-- **Infrastructure as Code** (`security-agents-infrastructure/`): Terraform modules for AWS (VPC, KMS, monitoring)
+- **CrowdStrike MCP Integration** (`src/security_agents/skills/`): MCP client framework with per-agent skill modules
+- **IAM Security** (`src/security_agents/integrations/iam-security/`): Okta integration, behavioral analytics (Isolation Forest ML), automated response, dual SIEM forwarding (Panther/CrowdStrike)
+- **SecOps AI Orchestration** (`src/security_agents/integrations/secops-ai-orchestration/`): AI confidence engine, autonomy tiers (0-3), governance controls with SOC2/ISO compliance tests
+- **Slack War Rooms** (`src/security_agents/integrations/slack-war-rooms/`): SOC collaboration bot
+- **Enterprise Topology** (`src/security_agents/integrations/enterprise-topology/`): Technology stack mapping and analysis
+- **Infrastructure as Code** (`infrastructure/`): Terraform modules for AWS (VPC, KMS, monitoring)
 
 ### Data Layer
 - **PostgreSQL**: Persistent storage (asyncpg driver, SQLAlchemy async ORM)
@@ -37,35 +55,39 @@ All agents communicate through the Intelligence Fusion Engine (`enhanced-analysi
 
 ## Build & Run Commands
 
+### Installation
+```bash
+pip install -e .                  # Install package in editable mode (uses pyproject.toml)
+pip install -e ".[dev]"           # Include dev/test dependencies
+```
+
 ### Local Development (Docker)
 ```bash
-cd enhanced-analysis && docker-compose up -d     # Start full stack (API, postgres, redis, prometheus, grafana)
-cd enhanced-analysis && docker-compose -f docker-compose.prod.yml up -d  # Production mode
-curl http://localhost:8080/health                  # Verify API
+cd deploy && docker-compose up -d                          # Start full stack (API, postgres, redis, prometheus, grafana)
+cd deploy && docker-compose -f docker-compose.prod.yml up -d  # Production mode
+curl http://localhost:8080/health                           # Verify API
 ```
 
 ### Direct Execution
 ```bash
-python enhanced-analysis/production_api_server.py          # API server
-python enhanced-analysis/production_api_server.py --dev     # Dev mode
+python -m security_agents.core.production_api_server          # API server
+python -m security_agents.core.production_api_server --dev     # Dev mode
 ```
 
 ### Running Tests
 ```bash
-# SecOps orchestration tests (has pytest.ini with coverage config)
-cd secops-ai-orchestration && pytest                        # All tests
-cd secops-ai-orchestration && pytest tests/security/        # Security tests only
-cd secops-ai-orchestration && pytest -m compliance          # By marker
-cd secops-ai-orchestration && pytest tests/test_orchestrator.py::test_name  # Single test
+# All tests (pytest config lives in pyproject.toml)
+pytest                                                      # Run full suite
+pytest tests/security/                                      # Security tests only
+pytest -m compliance                                        # By marker
+pytest tests/test_orchestrator.py::test_name                # Single test
 
-# CrowdStrike integration tests
-pytest crowdstrike-mcp-integration/tests/
-
-# IAM SIEM analytics tests
-pytest iam-security/siem-analytics/tests/
+# Subsystem tests
+pytest tests/integrations/                                  # Integration tests
+pytest tests/skills/                                        # Skill module tests
 ```
 
-### Test Markers (secops-ai-orchestration)
+### Test Markers
 `unit`, `integration`, `performance`, `security`, `compliance`, `ai`, `slow`, `requires_aws`, `requires_models`
 
 ### Code Quality
@@ -90,11 +112,13 @@ mypy .                   # Type checking
 - Structured JSON logging via `structlog`
 - Configuration managed through `config_manager.py` and `.env` files
 - Test files follow `test_*.py` naming; pytest with `asyncio_mode = auto` for async tests
-- Coverage target: 80% minimum (`--cov-fail-under=80` in pytest.ini)
+- Coverage target: 80% minimum (`--cov-fail-under=80` configured in `pyproject.toml`)
+- Package installed via `pip install -e .` — all tool config (pytest, black, isort, mypy) lives in `pyproject.toml`
 
 ## Important Notes
 
-- The `.gitignore` is minimal (only `temp-repos/`) — be careful not to commit `.env` files, credentials, or large binary artifacts
-- Several subsystems have independent `requirements.txt` files — there is no unified virtual environment or monorepo tooling
+- The `.gitignore` covers Python artifacts, virtual environments, IDE files, secrets, and OS files
+- The project uses a unified `pyproject.toml` for package management — no scattered `requirements.txt` files
 - The codebase references environment variables for secrets: `OKTA_API_TOKEN`, `GITHUB_TOKEN`, `VIRUSTOTAL_API_KEY`, and database/Redis connection strings
-- Agent source files are large (Alpha-4: ~23k lines, Beta-4: ~58k lines) — read specific sections rather than entire files
+- Agent engine source files are large (Alpha-4: ~23k lines, Beta-4: ~58k lines) — read specific sections rather than entire files
+- Legacy code from the previous flat repo structure is preserved in `archive/` for reference

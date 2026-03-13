@@ -1,0 +1,178 @@
+# Identity Threat Response System Configuration
+
+# Okta Configuration
+okta:
+  domain: "your-domain.okta.com"
+  api_token: "${OKTA_API_TOKEN}"
+  admin_groups:
+    - "00g1234567890abcdef"  # Super Admin group
+    - "00g0987654321fedcba"  # Security Admin group
+  rate_limits:
+    requests_per_minute: 100
+    concurrent_requests: 10
+
+# SIEM Integrations
+siem:
+  panther:
+    enabled: true
+    webhook_url: "https://your-panther-instance.com/webhooks"
+    api_key: "${PANTHER_API_KEY}"
+    alert_types:
+      - "SUSPICIOUS_LOGIN"
+      - "PRIVILEGE_ESCALATION"
+      - "ACCOUNT_COMPROMISE"
+      - "CREDENTIAL_STUFFING"
+  
+  crowdstrike:
+    enabled: false  # Future migration
+    client_id: "${CROWDSTRIKE_CLIENT_ID}"
+    client_secret: "${CROWDSTRIKE_CLIENT_SECRET}"
+    base_url: "https://api.crowdstrike.com"
+    falcon_fusion:
+      workflow_ids:
+        account_compromise: "wf_12345"
+        privilege_abuse: "wf_67890"
+
+# Response Actions Configuration
+response_actions:
+  # Account security actions
+  account_lockout:
+    enabled: true
+    duration_hours: 24
+    notify_user: true
+    require_approval: false
+  
+  mfa_step_up:
+    enabled: true
+    duration_hours: 168  # 1 week
+    policy_id: "00p1234567890abcdef"
+  
+  session_termination:
+    enabled: true
+    all_sessions: true
+    notify_user: true
+  
+  # Privilege management
+  role_revocation:
+    enabled: true
+    temporary_duration_hours: 72
+    preserve_basic_access: true
+    require_approval: true
+  
+  # Device management
+  device_deregistration:
+    enabled: true
+    trust_removal: true
+    require_re_enrollment: true
+
+# Notification System
+notifications:
+  # SOC analyst notifications
+  soc:
+    slack:
+      webhook_url: "${SOC_SLACK_WEBHOOK}"
+      channel: "#security-alerts"
+    email:
+      smtp_server: "smtp.company.com"
+      from_address: "security-alerts@company.com"
+      to_addresses:
+        - "soc-team@company.com"
+  
+  # Executive notifications (critical threats only)
+  executive:
+    email:
+      to_addresses:
+        - "ciso@company.com"
+        - "ceo@company.com"
+    threshold: "CRITICAL"
+  
+  # User notifications
+  end_user:
+    email_template: "account_security_action"
+    include_remediation_steps: true
+
+# TheHive Integration
+thehive:
+  url: "https://thehive.company.com"
+  api_key: "${THEHIVE_API_KEY}"
+  case_templates:
+    account_compromise: "Account Compromise Investigation"
+    insider_threat: "Insider Threat Analysis"
+    credential_stuffing: "Credential Stuffing Response"
+
+# SecurityAgents Platform Integration
+security_agents:
+  api_endpoint: "${SECURITY_AGENTS_API}"
+  api_key: "${SECURITY_AGENTS_KEY}"
+  sync_actions: true
+
+# Response Thresholds
+thresholds:
+  suspicious_login:
+    failed_attempts: 5
+    time_window_minutes: 15
+    response_level: "MEDIUM"
+  
+  privilege_abuse:
+    admin_actions_threshold: 10
+    time_window_minutes: 60
+    response_level: "HIGH"
+  
+  account_compromise:
+    indicators_threshold: 3
+    response_level: "CRITICAL"
+
+# Audit and Compliance
+audit:
+  log_level: "INFO"
+  log_file: "logs/identity_response.log"
+  log_format: "json"
+  retention_days: 2555  # 7 years for compliance
+  encrypt_logs: true
+  
+  # Compliance frameworks
+  frameworks:
+    sox: true
+    pci_dss: true
+    gdpr: true
+    iso27001: true
+
+# Fail-safe Mechanisms
+fail_safe:
+  manual_override:
+    enabled: true
+    approval_required: true
+    approvers:
+      - "security-admin@company.com"
+      - "ciso@company.com"
+  
+  emergency_stop:
+    enabled: true
+    stop_file: "/tmp/identity_response_stop"
+  
+  # Circuit breaker for automated actions
+  circuit_breaker:
+    failure_threshold: 5
+    timeout_seconds: 300
+    recovery_time_seconds: 600
+
+# Rate Limiting
+rate_limiting:
+  actions_per_minute: 20
+  actions_per_hour: 100
+  per_user_actions_per_day: 5
+
+# Monitoring
+monitoring:
+  health_check_interval_seconds: 30
+  metrics_endpoint: "/metrics"
+  prometheus_enabled: true
+  
+  alerts:
+    high_failure_rate:
+      threshold_percent: 10
+      time_window_minutes: 15
+    
+    response_time_degradation:
+      threshold_seconds: 30
+      time_window_minutes: 5
