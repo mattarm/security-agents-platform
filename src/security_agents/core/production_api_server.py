@@ -25,6 +25,10 @@ from security_agents.core.agent_orchestration_system import (
     AgentStatus, TaskStatus
 )
 from security_agents.core.intelligence_fusion_engine import IntelligenceType
+from security_agents.core.grc_frameworks import list_frameworks
+
+# LangGraph orchestrator (feature flag)
+USE_LANGGRAPH = os.environ.get("USE_LANGGRAPH", "false").lower() == "true"
 
 # Security
 security = HTTPBearer()
@@ -135,6 +139,7 @@ class SecurityAgentsAPI:
         
         self.orchestrator = None
         self.api_keys = self.load_api_keys()
+        self.grc_engine = None  # initialized lazily on first GRC request
         
         # Configure middleware
         self.setup_middleware()
@@ -212,7 +217,21 @@ class SecurityAgentsAPI:
             asyncio.create_task(self.orchestrator.start())
             # Wait for initialization
             await asyncio.sleep(2)
-            self.logger.info("✅ API Server startup complete")
+
+            # Initialize LangGraph orchestrator if enabled
+            if USE_LANGGRAPH:
+                try:
+                    from security_agents.core.graph_factory import GraphFactory
+                    factory = GraphFactory()
+                    self.graph_app = await factory.build()
+                    self.logger.info("LangGraph orchestrator initialized")
+                except Exception as e:
+                    self.logger.warning(f"LangGraph init failed, using legacy: {e}")
+                    self.graph_app = None
+            else:
+                self.graph_app = None
+
+            self.logger.info("API Server startup complete")
 
         @self.app.on_event("shutdown")
         async def shutdown_event():
@@ -244,17 +263,18 @@ class SecurityAgentsAPI:
                 raise HTTPException(status_code=503, detail="Orchestrator not initialized")
             
             status = await self.orchestrator.get_orchestrator_status()
-            
+            metrics = status.get('metrics', {})
+
             is_healthy = (
-                status['status'] == 'running' and
-                status['metrics']['active_agents'] > 0
+                status.get('status') == 'running' and
+                metrics.get('active_agents', 0) > 0
             )
-            
+
             return {
                 "healthy": is_healthy,
-                "status": status['status'],
-                "active_agents": status['metrics']['active_agents'],
-                "uptime_seconds": status['uptime_seconds'],
+                "status": status.get('status', 'unknown'),
+                "active_agents": metrics.get('active_agents', 0),
+                "uptime_seconds": status.get('uptime_seconds', 0),
                 "timestamp": datetime.now().isoformat()
             }
 
@@ -301,8 +321,8 @@ class SecurityAgentsAPI:
                 )
                 
             except Exception as e:
-                self.logger.error(f"❌ Analysis request failed: {str(e)}")
-                raise HTTPException(status_code=500, detail=f"Analysis request failed: {str(e)}")
+                self.logger.error(f"Analysis request failed: {str(e)}", exc_info=True)
+                raise HTTPException(status_code=500, detail="Internal error processing analysis request")
 
         @self.app.get("/analysis/{request_id}", tags=["Analysis"])
         async def get_analysis_status(
@@ -500,16 +520,17 @@ class SecurityAgentsAPI:
                 raise HTTPException(status_code=503, detail="Orchestrator not available")
             
             status = await self.orchestrator.get_orchestrator_status()
-            
+            metrics = status.get('metrics', {})
+
             return SystemMetricsModel(
-                requests_processed=status['metrics']['requests_processed'],
-                tasks_completed=status['metrics']['tasks_completed'],
-                tasks_failed=status['metrics']['tasks_failed'],
-                active_agents=status['metrics']['active_agents'],
-                intelligence_correlations=status['metrics']['intelligence_correlations'],
-                uptime_seconds=status['uptime_seconds'],
-                queue_size=status['queue_size'],
-                avg_response_time=status['metrics']['avg_response_time']
+                requests_processed=metrics.get('requests_processed', 0),
+                tasks_completed=metrics.get('tasks_completed', 0),
+                tasks_failed=metrics.get('tasks_failed', 0),
+                active_agents=metrics.get('active_agents', 0),
+                intelligence_correlations=metrics.get('intelligence_correlations', 0),
+                uptime_seconds=status.get('uptime_seconds', 0),
+                queue_size=status.get('queue_size', 0),
+                avg_response_time=metrics.get('avg_response_time', 0.0)
             )
 
         @self.app.get("/intelligence", tags=["Intelligence"])
@@ -584,7 +605,8 @@ class SecurityAgentsAPI:
                     "estimated_completion": response['estimated_completion']
                 }
             except Exception as e:
-                raise HTTPException(status_code=500, detail=f"Correlation request failed: {str(e)}")
+                self.logger.error(f"Correlation request failed: {str(e)}", exc_info=True)
+                raise HTTPException(status_code=500, detail="Internal error processing correlation request")
 
         @self.app.get("/metrics/dashboard", tags=["Metrics"])
         async def get_dashboard_metrics(client_info: Dict = Depends(self.verify_api_key)):
@@ -594,35 +616,210 @@ class SecurityAgentsAPI:
                 raise HTTPException(status_code=503, detail="Orchestrator not available")
             
             status = await self.orchestrator.get_orchestrator_status()
-            
+            metrics = status.get('metrics', {})
+            fusion = status.get('fusion_engine', {})
+
             # Calculate additional metrics
             current_time = datetime.now()
             last_hour_tasks = [
                 task for task in self.orchestrator.tasks.values()
-                if (task.completed_at and 
+                if (task.completed_at and
                     current_time - task.completed_at < timedelta(hours=1))
             ]
-            
+
             return {
                 "timestamp": current_time.isoformat(),
                 "system_health": {
-                    "status": status['status'],
-                    "uptime_hours": status['uptime_seconds'] / 3600,
-                    "active_agents": status['metrics']['active_agents'],
-                    "queue_size": status['queue_size']
+                    "status": status.get('status', 'unknown'),
+                    "uptime_hours": status.get('uptime_seconds', 0) / 3600,
+                    "active_agents": metrics.get('active_agents', 0),
+                    "queue_size": status.get('queue_size', 0)
                 },
                 "performance": {
                     "requests_per_hour": len(last_hour_tasks),
                     "success_rate": self.calculate_success_rate(last_hour_tasks),
-                    "avg_response_time": status['metrics']['avg_response_time']
+                    "avg_response_time": metrics.get('avg_response_time', 0.0)
                 },
                 "intelligence": {
-                    "correlations_found": status['metrics']['intelligence_correlations'],
-                    "active_intelligence": status['fusion_engine']['intelligence_store_size'],
-                    "connected_agents": status['fusion_engine']['subscribed_agents']
+                    "correlations_found": metrics.get('intelligence_correlations', 0),
+                    "active_intelligence": fusion.get('intelligence_store_size', 0),
+                    "connected_agents": fusion.get('subscribed_agents', 0)
                 },
                 "recent_activity": self.get_recent_activity_summary()
             }
+
+        # =================================================================
+        # GRC Endpoints
+        # =================================================================
+
+        @self.app.post("/api/v1/grc/assess", tags=["GRC"])
+        async def grc_assess(
+            framework_id: str = "nist_csf_2_0",
+            scope: str = "full",
+            team_id: str = "default",
+            client_info: Dict = Depends(self.verify_api_key)
+        ):
+            """Trigger compliance assessment against a framework."""
+            self._validate_framework_id(framework_id)
+            try:
+                engine = self._get_grc_engine()
+                posture = await engine.assess_compliance(framework_id, scope, team_id)
+                return posture.model_dump()
+            except ValueError as e:
+                raise HTTPException(status_code=400, detail=str(e))
+            except HTTPException:
+                raise
+            except Exception as e:
+                self.logger.error(f"GRC assess failed: {e}", exc_info=True)
+                raise HTTPException(status_code=500, detail="Internal error processing request")
+
+        @self.app.get("/api/v1/grc/posture/{framework}", tags=["GRC"])
+        async def grc_posture(
+            framework: str,
+            client_info: Dict = Depends(self.verify_api_key)
+        ):
+            """Get current compliance posture for a framework."""
+            self._validate_framework_id(framework)
+            try:
+                engine = self._get_grc_engine()
+                posture = await engine.assess_compliance(framework)
+                return posture.model_dump()
+            except ValueError as e:
+                raise HTTPException(status_code=400, detail=str(e))
+            except HTTPException:
+                raise
+            except Exception as e:
+                self.logger.error(f"GRC posture failed: {e}", exc_info=True)
+                raise HTTPException(status_code=500, detail="Internal error processing request")
+
+        @self.app.get("/api/v1/grc/gaps", tags=["GRC"])
+        async def grc_gaps(
+            framework_id: str = "nist_csf_2_0",
+            client_info: Dict = Depends(self.verify_api_key)
+        ):
+            """Get gap analysis for a framework."""
+            self._validate_framework_id(framework_id)
+            try:
+                engine = self._get_grc_engine()
+                gaps = await engine.analyze_gaps(framework_id)
+                return {"gaps": [g.model_dump() for g in gaps], "count": len(gaps)}
+            except ValueError as e:
+                raise HTTPException(status_code=400, detail=str(e))
+            except HTTPException:
+                raise
+            except Exception as e:
+                self.logger.error(f"GRC gaps failed: {e}", exc_info=True)
+                raise HTTPException(status_code=500, detail="Internal error processing request")
+
+        @self.app.get("/api/v1/grc/coverage/mitre", tags=["GRC"])
+        async def grc_mitre_coverage(
+            client_info: Dict = Depends(self.verify_api_key)
+        ):
+            """Get MITRE ATT&CK detection coverage matrix."""
+            try:
+                engine = self._get_grc_engine()
+                matrix = await engine.assess_mitre_coverage()
+                return matrix.model_dump()
+            except ValueError as e:
+                raise HTTPException(status_code=400, detail=str(e))
+            except Exception as e:
+                self.logger.error(f"GRC MITRE coverage failed: {e}", exc_info=True)
+                raise HTTPException(status_code=500, detail="Internal error processing request")
+
+        @self.app.post("/api/v1/grc/audit-package", tags=["GRC"])
+        async def grc_audit_package(
+            framework_id: str = "nist_csf_2_0",
+            scope: str = "full",
+            client_info: Dict = Depends(self.verify_api_key)
+        ):
+            """Generate complete audit package."""
+            self._validate_framework_id(framework_id)
+            try:
+                engine = self._get_grc_engine()
+                package = await engine.generate_audit_package(framework_id, scope)
+                return package.model_dump()
+            except ValueError as e:
+                raise HTTPException(status_code=400, detail=str(e))
+            except HTTPException:
+                raise
+            except Exception as e:
+                self.logger.error(f"GRC audit package failed: {e}", exc_info=True)
+                raise HTTPException(status_code=500, detail="Internal error processing request")
+
+        @self.app.get("/api/v1/grc/risk-register/{team_id}", tags=["GRC"])
+        async def grc_risk_register(
+            team_id: str,
+            client_info: Dict = Depends(self.verify_api_key)
+        ):
+            """Get team risk register."""
+            try:
+                engine = self._get_grc_engine()
+                return await engine.manage_risk_register(team_id, "list")
+            except ValueError as e:
+                raise HTTPException(status_code=400, detail=str(e))
+            except Exception as e:
+                self.logger.error(f"GRC risk register failed: {e}", exc_info=True)
+                raise HTTPException(status_code=500, detail="Internal error processing request")
+
+        # =================================================================
+        # LangGraph streaming endpoint
+        # =================================================================
+
+        @self.app.post("/analysis/stream", tags=["Analysis"])
+        async def stream_analysis(
+            request: AnalysisRequestModel,
+            client_info: Dict = Depends(self.verify_api_key)
+        ):
+            """SSE streaming analysis via LangGraph (requires USE_LANGGRAPH=true)."""
+            if not getattr(self, 'graph_app', None):
+                raise HTTPException(status_code=503, detail="LangGraph not enabled. Set USE_LANGGRAPH=true")
+
+            state = {
+                "messages": [],
+                "request": {
+                    "request_id": str(uuid.uuid4()),
+                    "analysis_type": request.analysis_type,
+                    "target": request.target,
+                    "priority": request.priority,
+                    "parameters": request.parameters,
+                },
+                "agent_results": [],
+                "intelligence_packets": [],
+                "fusion_results": {},
+                "autonomy_tier": 0,
+                "human_feedback": None,
+                "current_phase": "submitted",
+            }
+
+            try:
+                result = await self.graph_app.ainvoke(state)
+                return {
+                    "request_id": state["request"]["request_id"],
+                    "status": result.get("current_phase", "complete"),
+                    "agent_results": result.get("agent_results", []),
+                    "messages": [str(m) for m in result.get("messages", [])[-5:]],
+                }
+            except ValueError as e:
+                raise HTTPException(status_code=400, detail=str(e))
+            except Exception as e:
+                self.logger.error(f"Stream analysis failed: {e}", exc_info=True)
+                raise HTTPException(status_code=500, detail="Internal error processing stream analysis")
+
+    def _get_grc_engine(self):
+        """Return the singleton GRC engine, creating it on first call."""
+        if self.grc_engine is None:
+            from security_agents.agents.engines.zeta_grc_engine import ZetaGRCEngine
+            self.grc_engine = ZetaGRCEngine()
+        return self.grc_engine
+
+    def _validate_framework_id(self, framework_id: str):
+        """Validate framework_id against known frameworks. Raises HTTPException(400) if invalid."""
+        valid_ids = {f["id"] for f in list_frameworks()}
+        if framework_id not in valid_ids:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unknown framework_id '{framework_id}'. Valid frameworks: {sorted(valid_ids)}"
+            )
 
     def generate_results_summary(self, tasks: List) -> Dict[str, Any]:
         """Generate a summary of analysis results"""

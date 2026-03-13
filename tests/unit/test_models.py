@@ -54,7 +54,7 @@ class TestIntelligencePacket:
             "threat_campaign", "vulnerability", "infrastructure",
             "actor_profile", "ioc_enrichment", "supply_chain",
             "correlation", "incident", "phishing", "identity_threat",
-            "compliance", "metrics",
+            "compliance", "metrics", "grc",
         }
         actual = {t.value for t in IntelligenceType}
         assert expected == actual
@@ -93,6 +93,7 @@ class TestAgentTypes:
         expected = {
             "alpha_4_threat_intel", "beta_4_devsecops",
             "gamma_blue_team", "delta_red_team", "sigma_metrics",
+            "zeta_grc",
         }
         actual = {t.value for t in AgentType}
         assert expected == actual

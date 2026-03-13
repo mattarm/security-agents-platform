@@ -10,6 +10,7 @@ from security_agents.agents.beta4_agent import Beta4DevSecOpsAgent
 from security_agents.agents.gamma_agent import GammaBlueTeamAgent
 from security_agents.agents.delta_agent import DeltaRedTeamAgent
 from security_agents.agents.sigma_agent import SigmaMetricsAgent
+from security_agents.agents.zeta_agent import ZetaGRCAgent
 
 __all__ = [
     "Alpha4ThreatIntelAgent",
@@ -17,4 +18,5 @@ __all__ = [
     "GammaBlueTeamAgent",
     "DeltaRedTeamAgent",
     "SigmaMetricsAgent",
+    "ZetaGRCAgent",
 ]

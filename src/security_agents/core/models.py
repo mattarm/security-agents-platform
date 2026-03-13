@@ -35,6 +35,7 @@ class IntelligenceType(Enum):
     IDENTITY_THREAT = "identity_threat"
     COMPLIANCE = "compliance"
     METRICS = "metrics"
+    GRC = "grc"
 
 
 class Priority(Enum):
@@ -51,6 +52,7 @@ class AgentType(Enum):
     GAMMA = "gamma_blue_team"
     DELTA = "delta_red_team"
     SIGMA = "sigma_metrics"
+    ZETA = "zeta_grc"
 
 
 class TaskStatus(Enum):

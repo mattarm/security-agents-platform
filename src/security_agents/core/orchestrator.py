@@ -106,6 +106,7 @@ class SecurityAgentOrchestrator:
                 "gamma_blue_team": {"enabled": True, "max_concurrent_tasks": 5, "timeout": 300},
                 "delta_red_team": {"enabled": True, "max_concurrent_tasks": 2, "timeout": 900},
                 "sigma_metrics": {"enabled": True, "max_concurrent_tasks": 3, "timeout": 120},
+                "zeta_grc": {"enabled": True, "max_concurrent_tasks": 3, "timeout": 300},
             },
             "fusion_engine": {"enabled": True, "intelligence_retention_hours": 24},
             "orchestration": {
@@ -203,6 +204,10 @@ class SecurityAgentOrchestrator:
             ("security_agents.skills.insider_threat", "InsiderThreatSkill", "insider_threat"),
             ("security_agents.skills.deception_technology", "DeceptionTechnologySkill", "deception_technology"),
             ("security_agents.skills.pentest_management", "PentestManagementSkill", "pentest_management"),
+            ("security_agents.skills.compliance_check", "ComplianceCheckSkill", "compliance_check"),
+            ("security_agents.skills.control_mapping", "ControlMappingSkill", "control_mapping"),
+            ("security_agents.skills.evidence_collection", "EvidenceCollectionSkill", "evidence_collection"),
+            ("security_agents.skills.risk_scoring", "RiskScoringSkill", "risk_scoring"),
         ]
 
         for module_path, class_name, skill_name in skill_definitions:
@@ -401,6 +406,32 @@ class SecurityAgentOrchestrator:
                     task_type="analyze_phishing",
                     priority=request.priority,
                     assigned_agent="gamma_blue_team",
+                    status=TaskStatus.PENDING,
+                    created_at=now,
+                    parameters=request.parameters,
+                ))
+
+        # GRC / Compliance requests
+        if request.analysis_type in ("grc", "compliance"):
+            if "zeta_grc" in self._agents:
+                tasks.append(SecurityTask(
+                    task_id=f"{request.request_id}-grc",
+                    task_type="assess_compliance",
+                    priority=request.priority,
+                    assigned_agent="zeta_grc",
+                    status=TaskStatus.PENDING,
+                    created_at=now,
+                    parameters=request.parameters,
+                ))
+
+        # Include GRC in comprehensive analysis
+        if request.analysis_type == "comprehensive":
+            if "zeta_grc" in self._agents:
+                tasks.append(SecurityTask(
+                    task_id=f"{request.request_id}-grc",
+                    task_type="assess_compliance",
+                    priority=Priority.LOW,
+                    assigned_agent="zeta_grc",
                     status=TaskStatus.PENDING,
                     created_at=now,
                     parameters=request.parameters,
